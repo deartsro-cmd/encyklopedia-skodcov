@@ -1,0 +1,467 @@
+<!-- ============================================================
+     ENCYKLOPÉDIA ŠKODCOV – DDD Prešov (dddpresov.sk)
+     Samostatný HTML súbor. Vložte do WordPressu cez blok
+     "Vlastné HTML" (Custom HTML) alebo Elementor "HTML" widget.
+     Celý dizajn, filtrovanie aj vyhľadávanie je v tomto súbore.
+     Obrázky sa načítavajú z Wikimedia Commons.
+     ============================================================ -->
+<div id="ddd-encyklopedia">
+<style>
+/* --- izolované štýly (prefix .ddd-enc-, aby nekolidovali s témou) --- */
+#ddd-encyklopedia{--enc-green:#1f7a53;--enc-green-d:#155c3d;--enc-accent:#e6a417;--enc-dark:#1c2622;--enc-muted:#5c6b64;--enc-bg:#f4f7f5;--enc-card:#ffffff;--enc-line:#e2e9e5;--enc-radius:16px;--enc-shadow:0 6px 22px rgba(20,60,45,.08);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--enc-dark);line-height:1.6;box-sizing:border-box;max-width:1200px;margin:0 auto;padding:8px}
+#ddd-encyklopedia *,#ddd-encyklopedia *::before,#ddd-encyklopedia *::after{box-sizing:border-box}
+.ddd-enc-hero{background:linear-gradient(135deg,var(--enc-green),var(--enc-green-d));color:#fff;border-radius:var(--enc-radius);padding:34px 28px;margin-bottom:22px}
+.ddd-enc-hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,34px);line-height:1.2;font-weight:800;letter-spacing:-.5px}
+.ddd-enc-hero p{margin:0;max-width:760px;opacity:.94;font-size:15.5px}
+.ddd-enc-controls{position:sticky;top:0;z-index:20;background:var(--enc-bg);padding:12px 4px;margin:0 -4px 18px;border-radius:12px}
+.ddd-enc-search{width:100%;padding:13px 16px;border:2px solid var(--enc-line);border-radius:12px;font-size:15px;outline:none;transition:border-color .15s;background:#fff}
+.ddd-enc-search:focus{border-color:var(--enc-green)}
+.ddd-enc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ddd-enc-tab{border:1.5px solid var(--enc-line);background:#fff;color:var(--enc-dark);padding:9px 15px;border-radius:999px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ddd-enc-tab:hover{border-color:var(--enc-green)}
+.ddd-enc-tab.active{background:var(--enc-green);border-color:var(--enc-green);color:#fff}
+.ddd-enc-tab .c{opacity:.7;font-weight:700;margin-left:5px;font-size:12px}
+.ddd-enc-count{font-size:13px;color:var(--enc-muted);margin:2px 4px 14px}
+.ddd-enc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.ddd-enc-card{background:var(--enc-card);border:1px solid var(--enc-line);border-radius:var(--enc-radius);overflow:hidden;box-shadow:var(--enc-shadow);cursor:pointer;display:flex;flex-direction:column;transition:transform .16s,box-shadow .16s}
+.ddd-enc-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(20,60,45,.14)}
+.ddd-enc-thumb{position:relative;aspect-ratio:4/3;background:#e9efeb;overflow:hidden}
+.ddd-enc-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.ddd-enc-card:hover .ddd-enc-thumb img{transform:scale(1.05)}
+.ddd-enc-badge{position:absolute;top:10px;left:10px;background:rgba(28,38,34,.82);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;backdrop-filter:blur(3px)}
+.ddd-enc-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#dfeae4,#eef3f0);color:var(--enc-green-d);text-align:center;padding:14px}
+.ddd-enc-fallback svg{width:44px;height:44px;opacity:.5}
+.ddd-enc-fallback span{font-size:12px;font-style:italic;opacity:.8}
+.ddd-enc-body{padding:15px 16px 17px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ddd-enc-body h3{margin:0;font-size:17px;font-weight:700;line-height:1.25}
+.ddd-enc-latin{font-style:italic;color:var(--enc-muted);font-size:12.5px;margin-top:-2px}
+.ddd-enc-desc{font-size:13.5px;color:#3c4842;margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ddd-enc-more{margin-top:auto;padding-top:10px;color:var(--enc-green);font-weight:700;font-size:13px;display:flex;align-items:center;gap:5px}
+.ddd-enc-empty{text-align:center;padding:50px 20px;color:var(--enc-muted)}
+/* modal */
+.ddd-enc-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:flex-start;justify-content:center;background:rgba(15,25,20,.6);backdrop-filter:blur(4px);padding:24px 14px;overflow-y:auto}
+.ddd-enc-modal.open{display:flex}
+.ddd-enc-dialog{background:#fff;border-radius:20px;max-width:640px;width:100%;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.35);animation:ddd-pop .2s ease}
+@keyframes ddd-pop{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.ddd-enc-mhead{position:relative;aspect-ratio:16/9;background:#e9efeb}
+.ddd-enc-mhead img{width:100%;height:100%;object-fit:cover}
+.ddd-enc-close{position:absolute;top:12px;right:12px;width:38px;height:38px;border:none;border-radius:50%;background:rgba(28,38,34,.75);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ddd-enc-close:hover{background:var(--enc-dark)}
+.ddd-enc-mbody{padding:22px 26px 28px}
+.ddd-enc-mbody .ddd-enc-badge{position:static;display:inline-block;margin-bottom:10px;background:var(--enc-green);backdrop-filter:none}
+.ddd-enc-mbody h2{margin:0 0 2px;font-size:24px;font-weight:800}
+.ddd-enc-mbody .ddd-enc-latin{font-size:14px;margin-bottom:16px}
+.ddd-enc-sec{margin-top:18px}
+.ddd-enc-sec h4{margin:0 0 7px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--enc-green-d);display:flex;align-items:center;gap:7px}
+.ddd-enc-sec h4 svg{width:17px;height:17px}
+.ddd-enc-sec p{margin:0;font-size:14.5px;color:#33403a}
+.ddd-enc-callout{background:#f0f7f3;border:1px solid #d6e7dd;border-left:4px solid var(--enc-green);border-radius:10px;padding:14px 16px;margin-top:22px;font-size:13.5px}
+.ddd-enc-callout strong{color:var(--enc-green-d)}
+.ddd-enc-cta{display:inline-block;margin-top:12px;background:var(--enc-accent);color:#1c2622;font-weight:700;text-decoration:none;padding:11px 20px;border-radius:10px;font-size:14px}
+.ddd-enc-cta:hover{filter:brightness(1.05)}
+.ddd-enc-foot{margin:26px 4px 6px;font-size:11.5px;color:var(--enc-muted);text-align:center}
+.ddd-enc-foot a{color:var(--enc-muted)}
+@media(max-width:600px){.ddd-enc-hero{padding:26px 20px}.ddd-enc-mbody{padding:18px 18px 24px}}
+</style>
+
+<div class="ddd-enc-hero">
+  <h1>Encyklopédia škodcov</h1>
+  <p>Prehľad najčastejších škodcov v domácnostiach, exteriéri, záhrade aj skladoch. Pri každom druhu nájdete fotografiu, popis a odborný postup likvidácie. Vyberte kategóriu alebo vyhľadávajte podľa názvu.</p>
+</div>
+
+<div class="ddd-enc-controls">
+  <input type="text" class="ddd-enc-search" id="dddEncSearch" placeholder="🔍 Hľadať škodcu (napr. ploštica, mravec, potkan)…" aria-label="Vyhľadávanie škodcu">
+  <div class="ddd-enc-tabs" id="dddEncTabs"></div>
+</div>
+<div class="ddd-enc-count" id="dddEncCount"></div>
+<div class="ddd-enc-grid" id="dddEncGrid"></div>
+<div class="ddd-enc-empty" id="dddEncEmpty" style="display:none">Pre zadané kritériá sme nenašli žiadneho škodcu. Skúste iný výraz.</div>
+
+<div class="ddd-enc-foot">
+  Fotografie: <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> (licencie jednotlivých autorov). Obsah má informatívny charakter – pri zamorení odporúčame odborný zásah.
+</div>
+
+<!-- Modal -->
+<div class="ddd-enc-modal" id="dddEncModal" role="dialog" aria-modal="true">
+  <div class="ddd-enc-dialog" id="dddEncDialog"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- KONFIGURÁCIA: telefón / odkaz na objednávku (upravte podľa potreby) ----
+  var CTA_LINK = "https://www.dddpresov.sk/kontakt";
+  var CTA_TEXT = "Objednať odborný zásah";
+
+  var CATS = [
+    {id:"all",       label:"Všetci škodcovia"},
+    {id:"domaci",    label:"Domáci škodcovia"},
+    {id:"vonkajsi",  label:"Vonkajší škodcovia"},
+    {id:"zahradni",  label:"Záhradní škodcovia"},
+    {id:"skladistni",label:"Skladoví škodcovia"},
+    {id:"hlodavce",  label:"Hlodavce"}
+  ];
+
+  var DATA = [
+  /* ===================== DOMÁCI ŠKODCOVIA ===================== */
+  {cat:"domaci",name:"Rus domový",latin:"Blattella germanica",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Blattodea._Cascuda._Santiago_de_Compostela_1.jpg?width=500",
+   desc:"Drobný, svetlohnedý rus s dvoma tmavými pozdĺžnymi pruhmi na štíte, dlhý približne 10–15 mm. Je najrozšírenejším vnútorným druhom švábovitého hmyzu, obľubuje teplé a vlhké prostredie kuchýň, kúpeľní a stravovacích prevádzok. Množí sa mimoriadne rýchlo a aktívny je najmä v noci.",
+   znaky:"Trus pripomínajúci mleté korenie, prázdne vajíčkové púzdra (ootéky), nepríjemný zápach pri silnom zamorení a náhle rozbehnutie hmyzu po rozsvietení.",
+   lik:"Základom je dôsledné monitorovanie lepovými doskami a odstránenie zdrojov potravy a vlhkosti. Profesionálne sa nasadzujú požerové gélové nástrahy s oneskoreným účinkom, ktoré škodca prenáša do úkrytov, doplnené o cielený reziduálny postrek štrbín a rozvodov. Zásah sa po 2–3 týždňoch opakuje, aby zasiahol vyliahnuté jedince."},
+
+  {cat:"domaci",name:"Šváb východný (obyčajný)",latin:"Blatta orientalis",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Blatta_orientalis_male_from_Botevgrad%2C_Bulgaria_02.jpg?width=500",
+   desc:"Väčší, tmavohnedý až čierny šváb dorastajúci do 25–30 mm s leskom. Uprednostňuje chladnejšie a vlhké priestory – pivnice, kanály, práčovne a odpadové šachty. Pohybuje sa pomalšie a menej šplhá po hladkých plochách ako rus domový.",
+   znaky:"Silný zatuchnutý zápach, tmavý trus pozdĺž stien, výskyt pri kanalizačných vpustiach a v suterénoch.",
+   lik:"Popri sanitácii a utesnení vstupov cez kanalizáciu sa aplikuje reziduálny postrek na prahy, sokle a okolie vpustí. Do vlhkých úkrytov sa vkladajú gélové a granulované nástrahy. Pri rozsiahlom zamorení bytových domov je vhodná plošná koordinácia všetkých vchodov naraz, aby sa škodca nepresúval medzi bytmi."},
+
+  {cat:"domaci",name:"Mravec faraónsky",latin:"Monomorium pharaonis",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Monomorium_pharaonis_casent0173986_profile_1.jpg?width=500",
+   desc:"Veľmi malý (1,5–2 mm), žltohnedý mravec s viacerými kráľovnami v jednom hniezde. Žije v teplých budovách celoročne – v nemocniciach, bytovkách a kuchyniach, kde si buduje rozvetvené kolónie v stenách a rozvodoch. Prenáša mikroorganizmy, čím je rizikový najmä v zdravotníctve.",
+   znaky:"Tenké, súvislé „cestičky“ mravcov k potrave, výskyt aj v zime, hniezda skryté v izolácii a za obkladmi.",
+   lik:"Postrek je pri tomto druhu kontraproduktívny – hniezdo sa rozdelí a rozšíri (tzv. budding). Výhradne sa preto používajú špeciálne požerové nástrahy (gél, tekuté a bielkovinové návnady), ktoré robotnice odnesú kráľovnám a zlikvidujú celú kolóniu. Zásah trvá niekoľko týždňov a vyžaduje trpezlivosť a priebežnú kontrolu."},
+
+  {cat:"domaci",name:"Mravec čierny (záhradný)",latin:"Lasius niger",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Black_Garden_Ant_tending_Citrus_Mealybug_%2816063538972%29.jpg?width=500",
+   desc:"Čierny až tmavohnedý mravec dlhý 3–5 mm, bežný v záhradách a okolí domov. Do interiéru vniká za sladkou a mastnou potravou, hniezda si stavia v pôde, pod dlažbou a v základoch. V lete sa objavuje rojenie okrídlených jedincov.",
+   znaky:"Kôpky jemnej zeminy medzi dlaždicami, sústredený pohyb mravcov k spižírni, okrídlené jedince pri oknách počas rojenia.",
+   lik:"Utesnia sa vstupné škáry a odstránia zdroje potravy. Von aj dnu sa kladú požerové nástrahy prenášané do hniezda, prípadne sa robí lokálny reziduálny postrek vstupných trás a základov objektu. Pri hniezdach v záhrade je účinné cielené ošetrenie priamo v mieste kolónie."},
+
+  {cat:"domaci",name:"Ploštica posteľná",latin:"Cimex lectularius",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Bed_bug%2C_Cimex_lectularius_%289627010587%29.jpg?width=500",
+   desc:"Sploštený, hrdzavohnedý hmyz veľkosti šošovice (4–6 mm), ktorý sa živí ľudskou krvou v noci. Cez deň sa ukrýva v posteliach, matracoch, za lištami a v čalúnení. Rýchlo sa šíri batožinou, nábytkom a medzi bytmi – nesúvisí s úrovňou hygieny.",
+   znaky:"Rady či skupinky svrbivých štípancov, drobné tmavé bodky (trus) na posteľnej bielizni, krvavé škvrny a sladkastý zápach pri silnom zamorení.",
+   lik:"Nevyhnutný je odborný zásah kombinujúci reziduálny postrek úkrytov s termickou dezinsekciou – zahriatím priestoru na teplotu smrteľnú pre všetky vývojové štádiá vrátane vajíčok. Textílie sa perú a sušia pri vysokej teplote. Kontrola a opakovanie zásahu po 10–14 dňoch je pri plošticiach kľúčové."},
+
+  {cat:"domaci",name:"Mucha domáca",latin:"Musca domestica",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Common_house_fly%2C_Musca_domestica.jpg?width=500",
+   desc:"Sivá mucha s tmavými pruhmi na hrudi, dlhá 6–7 mm, celosvetovo rozšírená. Rozmnožuje sa v organických zvyškoch, hnoji a odpadkoch, kde larvy (červy) dozrievajú za pár dní. Prenáša množstvo choroboplodných zárodkov na potraviny.",
+   znaky:"Hromadný výskyt pri odpade a potravinách, drobné tmavé bodky po sadaní na plochách, larvy v rozkladajúcom sa materiáli.",
+   lik:"Základom je hygiena – uzavretý odpad, čisté priestory a sieťky do okien. Profesionálne sa aplikujú požerové nástrahy proti muchám, reziduálny postrek odpočinkových plôch a v prevádzkach elektrické lapače s UV svetlom. Pri chovoch a prevádzkach sa cielene ošetrujú aj liahniská lariev."},
+
+  {cat:"domaci",name:"Moľa šatníková",latin:"Tineola bisselliella",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Tineola.bisselliella.7218.jpg?width=500",
+   desc:"Drobná slamovožltá moľa s rozpätím krídel okolo 12 mm, ktorá nelieta k svetlu, ale sa skrýva v šatníkoch. Škodu spôsobujú larvy, ktoré ožierajú vlnu, kožušiny, kožu a iné živočíšne vlákna. Uprednostňuje tmavé, málo vetrané úložné priestory.",
+   znaky:"Diery a vyžraté plôšky na oblečení, jemné pradielka a zámotky, poletujúce malé mole pri otvorení skrine.",
+   lik:"Napadnutý textil sa vyperie alebo vyčistí pri vysokej teplote, prípadne vymrazí. Skrine sa vysajú a ošetria kontaktným prípravkom do škár, doplneným o feromónové lapače na monitoring a odchyt samčekov. Pri opakovanom výskyte je vhodné odborné ošetrenie celého úložného priestoru."},
+
+  {cat:"domaci",name:"Kožojed domáci",latin:"Dermestes lardarius",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Dermestes_lardarius_-_top_%28aka%29.jpg?width=500",
+   desc:"Podlhovastý chrobák (7–9 mm) s charakteristickým svetlým pásom bodiek cez čierne krovky. Živí sa materiálmi živočíšneho pôvodu – údeninami, syrmi, kožou, perím aj mŕtvym hmyzom. Larvy s dlhými chĺpkami sa pred kuklením zavŕtavajú do mäkkých materiálov (drevo, izolácia), kde si vytvárajú úkryt.",
+   znaky:"Zvlečené chĺpkaté larválne kožky, drobné otvory a poškodenie zásob či kožených výrobkov, nález chrobákov pri oknách.",
+   lik:"Odstránia a zlikvidujú sa napadnuté zásoby a organické zvyšky (aj uhynutý hmyz v dutinách). Priestor sa dôkladne vysaje a ošetrí reziduálnym postrekom škár a úložných plôch. V potravinárskych prevádzkach sa dopĺňa dôsledná sanitácia a monitoring, aby sa zabránilo opätovnému usídleniu."},
+
+  {cat:"domaci",name:"Moľa potravinová (špajzová)",latin:"Plodia interpunctella",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Plodia_interpunctella_-_Indianmeal_moth.jpg?width=500",
+   desc:"Malá moľa s dvojfarebnými krídlami – svetlou základňou a medeno-hnedým vonkajším okrajom. Larvy napádajú múku, orechy, sušené ovocie, cestoviny, krmivá a čokoládu. Rozšírená je vo väčšine domácností so zásobami suchých potravín.",
+   znaky:"Pavučinkové spriadanie a hrudky v potravinách, húseničky lezúce po stenách skríň, poletujúce mole vo večerných hodinách.",
+   lik:"Napadnuté potraviny sa vyhodia a police dôkladne vyčistia a vysajú vrátane škár a rohov. Zásoby sa presunú do vzduchotesných nádob. Na monitoring a odchyt samčekov slúžia feromónové lapače; pri väčšom výskyte sa priestor ošetrí kontaktným prípravkom mimo potravín."},
+
+  {cat:"domaci",name:"Blcha ľudská",latin:"Pulex irritans",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/PulexIrritans.jpg?width=500",
+   desc:"Bezkrídly, zboku sploštený hmyz veľký 2–3 mm s mimoriadnou skákavosťou. Živí sa krvou človeka aj zvierat a dokáže preskočiť na nového hostiteľa. Vajíčka a larvy sa vyvíjajú v prachu, škárach podláh a v pelieškach.",
+   znaky:"Svrbivé štípance zoskupené na nohách a členkoch, drobné skáčuce jedince, čierne bodky trusu v lôžku zvierat.",
+   lik:"Ošetrujú sa zvieratá vhodnými veterinárnymi prípravkami a súčasne prostredie – pranie textílií pri vysokej teplote a dôkladné vysávanie. Profesionálne sa aplikuje reziduálny postrek podláh, líšt a pelieškov, ideálne s prídavkom regulátora rastu (IGR), ktorý zastaví vývoj lariev. Zásah sa opakuje podľa vývojového cyklu."},
+
+  {cat:"domaci",name:"Blcha mačacia (zvieracia)",latin:"Ctenocephalides felis",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/%D0%9A%D0%BE%D1%88%D0%B0%D1%87%D1%8C%D1%8F_%D0%B1%D0%BB%D0%BE%D1%85%D0%B0.jpg?width=500",
+   desc:"Najčastejšia blcha domácich zvierat, ktorá napáda mačky, psy aj človeka. Meria 1–3 mm a väčšinu života trávi na hostiteľovi, kým vajíčka padajú do prostredia. Môže prenášať pásomnice a spôsobovať alergickú dermatitídu zvierat.",
+   znaky:"Škrabanie a nepokoj zvierat, „blší trus“ (tmavé zrniečka) v srsti, štípance na členkoch ľudí.",
+   lik:"Nutné je súčasné ošetrenie zvieraťa aj prostredia – inak sa zamorenie vracia. Prostredie sa dôkladne vysaje a operie, následne sa aplikuje reziduálny postrek s regulátorom rastu na podlahy, koberce a peleše. Postup sa po 2–3 týždňoch zopakuje, aby zasiahol novo vyliahnuté blchy."},
+
+  {cat:"domaci",name:"Rybenka domáca",latin:"Lepisma saccharina",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/LepismaSaccharina.jpg?width=500",
+   desc:"Striebrosivý, bezkrídly hmyz kvapkovitého tvaru s troma štetinkami na zadočku, dlhý 8–12 mm. Vyhľadáva vlhké a tmavé miesta – kúpeľne, kuchyne a priestory za obkladmi. Živí sa škrobom, papierom, lepidlami a zvyškami potravín.",
+   znaky:"Nočný pohyb rýchlych striebristých jedincov, ohryzené okraje papiera či tapiet, výskyt v umývadlách a vaniach.",
+   lik:"Kľúčové je zníženie vlhkosti – vetranie, odvlhčovanie a utesnenie škár, kde sa ukrývajú. Aplikuje sa kontaktný prípravok alebo prášok do štrbín, prahov a za obklady. Pri väčšom výskyte pomáha odborné ošetrenie skrytých vlhkých dutín, kde prebieha rozmnožovanie."},
+
+  {cat:"domaci",name:"Octomilka (drozofila)",latin:"Drosophila melanogaster",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Drosophila_melanogaster_Proboscis.jpg?width=500",
+   desc:"Drobná muška (2–3 mm) so žltkastým telom a červenými očami, ktorá sa zhromažďuje pri kvasiacom ovocí a nápojoch. Rozmnožuje sa mimoriadne rýchlo v zvyškoch organického materiálu a v odtokoch. V lete a jeseni sa objavuje hromadne v kuchyniach a prevádzkach.",
+   znaky:"Oblak drobných mušiek nad ovocím, košom či odtokom, výskyt pri víne, pive a octe.",
+   lik:"Odstránia sa zdroje kvasenia – prezreté ovocie, zvyšky nápojov, znečistené odtoky a koše. Odtoky sa vyčistia a ošetria, na dolapávanie sa využívajú octové či feromónové lapače. V prevádzkach sa dopĺňa reziduálne ošetrenie odpočinkových plôch a dôsledná sanitácia."},
+
+  {cat:"domaci",name:"Roztoče bytového prachu",latin:"Dermatophagoides spp.",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/House_dust_mite_%28Dermatophagoides_pteronyssinus%29.jpg?width=500",
+   desc:"Mikroskopické roztoče (0,2–0,3 mm), voľným okom neviditeľné, žijúce v matracoch, čalúnení, kobercoch a posteľnej bielizni. Živia sa odlúpnutými čiastočkami ľudskej kože. Ich trus a telá patria medzi najčastejšie spúšťače alergií a astmy.",
+   znaky:"Alergické prejavy – nádcha, kýchanie, svrbenie očí a zhoršenie astmy najmä ráno a v prašnom prostredí.",
+   lik:"Ťažisko je v obmedzení prostredia: pranie bielizne pri 60 °C, antialergénne poťahy, pravidelné vysávanie filtrom HEPA a udržiavanie nižšej vlhkosti. Profesionálne sa vykonáva hĺbkové ošetrenie matracov a čalúnenia s akaricídnymi prípravkami. Ide skôr o dlhodobú reguláciu než jednorazovú likvidáciu."},
+
+  {cat:"domaci",name:"Červotoč",latin:"Anobium punctatum",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Holzwurm_anobium_punctuatum_in_hole.jpg?width=500",
+   desc:"Malý hnedý chrobáčik (3–5 mm), ktorého larvy vŕtajú chodbičky v suchom dreve nábytku, trámov a krovov. Vývoj v dreve trvá aj niekoľko rokov, počas ktorých larvy postupne narúšajú statiku. Dospelé chrobáky vyletujú von malými okrúhlymi otvormi.",
+   znaky:"Okrúhle výletové otvory (1–2 mm), jemný svetlý drevný prach (podrť) pod nábytkom, oslabené a krehnúce drevo.",
+   lik:"Menšie kusy nábytku sa dajú ošetriť náterom či injektážou insekticídu do otvorov, prípadne termicky alebo v plynovej komore. Pri napadnutých krovoch a trámoch sa robí odborná injektáž a plošné ošetrenie dreva, v závažných prípadoch aj termická sanácia. Vždy je vhodné posúdiť rozsah napadnutia odborníkom."},
+
+  {cat:"domaci",name:"Fúzač krovový",latin:"Hylotrupes bajulus",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Cerambycidae_-_Hylotrupes_bajulus_%28male%29.JPG?width=500",
+   desc:"Čierny až hnedý chrobák (8–25 mm) s dlhými fúzmi, ktorého larvy patria k najnebezpečnejším škodcom stavebného ihličnatého dreva. Larvy niekoľko rokov požierajú vnútro trámov a krovov, pričom navonok drevo pôsobí neporušene. Napadnutie výrazne oslabuje nosné konštrukcie.",
+   znaky:"Oválne výletové otvory (6–10 mm), praskavé zvuky hryzenia lariev v tichu, vypadávajúca hrubá podrť a duté znejúce trámy.",
+   lik:"Nevyhnutné je odborné posúdenie statiky a rozsahu napadnutia. Používa sa hĺbková injektáž a tlakové ošetrenie dreva insekticídom, prípadne termická sanácia (zahriatie dreva na teplotu smrteľnú pre larvy) alebo plynovanie celej konštrukcie. Silne poškodené prvky sa vymieňajú a preventívne ošetria."},
+
+  /* ===================== VONKAJŠÍ ŠKODCOVIA ===================== */
+  {cat:"vonkajsi",name:"Komár",latin:"Culex pipiens",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Culex_pipiens_2007-1.jpg?width=500",
+   desc:"Štíhly dvojkrídly hmyz s dlhými nohami, ktorého samičky sajú krv na dozretie vajíčok. Vyvíja sa vo vodných liahniskách – nádobách, mlákach, kanáloch a stojatej vode. Okrem svrbivých štípancov môže prenášať pôvodcov chorôb.",
+   znaky:"Svrbivé opuchnuté štípance, bzučanie v noci, hromadný výskyt pri vode a vo vlhkých lokalitách.",
+   lik:"Najúčinnejšie je odstránenie liahnísk – vyliatie stojatej vody a čistenie odkvapov a nádrží. Vodné plochy, ktoré nemožno vysušiť, sa ošetrujú larvicídmi (biologickými prípravkami proti larvám). Proti dospelým komárom sa v exteriéri používa ULV zahmlievanie a reziduálny postrek vegetácie a odpočinkových plôch."},
+
+  {cat:"vonkajsi",name:"Ovad",latin:"Tabanus spp.",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Tabanus_sudeticus_MHNT_Portrait.jpg?width=500",
+   desc:"Robustná, veľká mucha (do 25 mm) s výraznými očami, ktorej samičky bolestivo bodajú a sajú krv. Vyskytuje sa najmä pri vode, pasienkoch a lesných okrajoch za horúcich dní. Bodnutie je bolestivé a môže vyvolať silnú lokálnu reakciu.",
+   znaky:"Bolestivé krvácajúce bodnutia, výskyt pri dobytku, vode a v teplom slnečnom počasí.",
+   lik:"Ochrana spočíva v repelentoch, sieťkach a špeciálnych lapačoch ovadov využívajúcich pohyb a teplo. Pri chovoch zvierat sa ošetruje okolie a odpočinkové plochy reziduálnym postrekom. Úplné odstránenie voľne žijúcich populácií nie je reálne – ťažisko je v ochrane osôb a zvierat."},
+
+  {cat:"vonkajsi",name:"Osa",latin:"Vespula vulgaris",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Vespula_vulgaris_queen.jpg?width=500",
+   desc:"Čierno-žlto pruhovaný blanokrídly hmyz dlhý 12–17 mm, žijúci v papierových hniezdach v podkroviach, dutinách stien a zemi. V lete a na jeseň je agresívnejšia a vyhľadáva sladké potraviny. Dokáže bodnúť opakovane, čo je nebezpečné najmä pri alergii.",
+   znaky:"Zvýšený nálet os k jedlu a nápojom, viditeľné vletovanie do otvoru hniezda, papierové hniezdo v podkroví či pod strechou.",
+   lik:"Odstránenie hniezda prenechajte odborníkom s ochranným výstrojom – svojpomocné zásahy často končia bodnutím roja. Do hniezda sa aplikuje insekticídny prášok alebo pena, po znefunkčnení sa hniezdo odstráni. Zásah sa robí najlepšie za chladu (ráno/večer), keď sú osy v hniezde."},
+
+  {cat:"vonkajsi",name:"Sršeň obyčajný",latin:"Vespa crabro",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/VespaCrabroCollezione.jpg?width=500",
+   desc:"Najväčší náš blanokrídly hmyz (18–35 mm) s hnedo-žltým sfarbením, ktorý si stavia hniezda v dutinách stromov, podkroviach a debniach roliet. Napriek povesti je menej útočný ako osa, no jeho bodnutie je bolestivejšie. Hniezdo dokáže rýchlo narásť do stoviek jedincov.",
+   znaky:"Hlasné bzučanie veľkých jedincov, nočná aktivita pri svetle, vletovanie do dutín a hniezdo v podkroví alebo strome.",
+   lik:"Kvôli veľkosti hniezda a bolestivosti bodnutí je odborný zásah nutnosťou. Aplikuje sa insekticíd priamo do hniezda za zníženej aktivity (skoro ráno/večer) v ochrannom obleku, následne sa hniezdo odstráni a vstupný otvor uzavrie. Sršne sú užitoční predátori iného hmyzu – zasahuje sa len pri reálnom ohrození osôb."},
+
+  {cat:"vonkajsi",name:"Mucha mäsiarka",latin:"Sarcophaga carnaria",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Sarcophaga_Bercaea2.jpg?width=500",
+   desc:"Sivá mucha so šachovnicovým vzorom na zadočku a červenkastými očami, väčšia než mucha domáca. Kladie živé larvy priamo na mäso, mršiny a organický odpad. V prevádzkach a chovoch predstavuje hygienické riziko a prenášača nákaz.",
+   znaky:"Výskyt pri mäse, odpade a uhynutých zvieratách, rýchly nález lariev v rozkladajúcom sa materiáli.",
+   lik:"Nevyhnutná je hygiena – uzavretý odpad, likvidácia mršín a čistota prevádzky. Aplikuje sa reziduálny postrek odpočinkových plôch a požerové nástrahy, v prevádzkach doplnené o UV lapače. Cielene sa ošetrujú miesta liahnenia lariev, aby sa prerušil vývojový cyklus."},
+
+  {cat:"vonkajsi",name:"Kliešť obyčajný",latin:"Ixodes ricinus",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Ixodes_ricinus_on_dry_grass.jpg?width=500",
+   desc:"Vonkajší parazit (článkonožec) z čeľade kliešťovité, ktorý sa prisáva na kožu človeka a zvierat a saje krv niekoľko dní. Vyskytuje sa vo vysokej tráve, kroví a lesných okrajoch od jari do jesene. Je hlavným prenášačom lymskej boreliózy a kliešťovej encefalitídy.",
+   znaky:"Prisatý roztoč na koži, začervenanie okolo miesta prisatia, výskyt po pobyte v tráve a lese.",
+   lik:"V okolí obydlí sa znižuje riziko kosením trávy, odstraňovaním lístia a úpravou prechodovej zóny medzi lesom a záhradou. Zamorené plochy sa ošetrujú akaricídnym postrekom vegetácie a prízemnej vrstvy. Osobnú ochranu tvoria repelenty, vhodný odev a dôsledná kontrola tela po pobyte v prírode."},
+
+  {cat:"vonkajsi",name:"Kliešťovec kurí (roztoč)",latin:"Dermanyssus gallinae",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Dermanyssus_gallinae_mite.jpg?width=500",
+   desc:"Drobný červeno-sivý roztoč (do 1 mm), ktorý v noci saje krv hydiny a vtákov, cez deň sa ukrýva v škárach kurínov a hniezd. Pri opustených hniezdach na budovách môže napadnúť aj človeka. Silne oslabuje nosnice a znižuje produkciu.",
+   znaky:"Nepokoj a chudnutie hydiny, sivo-červený „popol“ v škárach, svrbivé štípance u ľudí pri vtáčích hniezdach.",
+   lik:"Odstránia sa staré hniezda a kurín sa dôkladne vyčistí. Aplikuje sa akaricídny postrek a prášok do všetkých škár, bidiel a úkrytov, zásah sa opakuje podľa vývojového cyklu roztoča. Pri napadnutí obydlí cez vtáčie hniezda na fasáde sa hniezda odstraňujú a vstupy zabezpečia."},
+
+  {cat:"vonkajsi",name:"Bodavka (mucha bodavá)",latin:"Stomoxys calcitrans",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Stomoxys_calcitrans_on_aloe_vera.jpg?width=500",
+   desc:"Podobá sa muche domácej, no má bodavý cuciak a saje krv človeka aj hospodárskych zvierat. Vyvíja sa v hnijúcej slame, hnoji a rastlinných zvyškoch, typicky pri chovoch. Bodnutie do nôh je ostré a bolestivé.",
+   znaky:"Bolestivé bodnutie (najmä do dolných končatín), výskyt pri maštaliach, hnoji a slame.",
+   lik:"Základom je odstránenie liahnísk – vlhkej slamy, hnoja a rastlinných zvyškov. Aplikuje sa reziduálny postrek stien a odpočinkových plôch a požerové nástrahy, v prevádzkach doplnené o lapače. Dôsledná sanitácia okolia chovu je pri bodavkách rozhodujúca."},
+
+  {cat:"vonkajsi",name:"Bzdocha mramorovaná",latin:"Halyomorpha halys (Pentatomidae)",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Pentatomidae_-_Halyomorpha_halys-001.JPG?width=500",
+   desc:"Štítovitá ploštica so šesťuholníkovým telom, ktorá pri podráždení vylučuje zapáchajúci sekrét. Na jeseň hromadne vniká do budov, kde prezimuje v škárach a podkroviach. Niektoré druhy (napr. bzdocha mramorovaná) poškodzujú ovocie a zeleninu.",
+   znaky:"Zápach pri rozdrvení, hromadný nálet na fasády a okná na jeseň, výskyt v podkroví a za roletami počas zimy.",
+   lik:"Prevenciou je utesnenie škár, sieťky a tesnenia okien, ktorými sa dostáva dnu. Jednotlivé jedince sa radšej vysajú, než rozdrvia (kvôli zápachu). Pri hromadnom nálete sa fasáda a vstupné miesta ošetria reziduálnym postrekom v období pred zimovaním."},
+
+  {cat:"vonkajsi",name:"Kováčik (drôtovce)",latin:"Agriotes spp. / Elateridae",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Denticollis.linearis.3.jpg?width=500",
+   desc:"Podlhovastý hnedý až čierny chrobák, ktorý sa po prevrátení dokáže vymrštiť s cvaknutím. Skutočnú škodu robia jeho tuhé žltohnedé larvy – drôtovce, ktoré v pôde ožierajú korene, hľuzy a osivo. Vývoj lariev v pôde trvá niekoľko rokov.",
+   znaky:"Vädnutie a hynutie rastlín, chodbičky a diery v zemiakoch a koreňoch, žltohnedé tuhé larvy v pôde.",
+   lik:"V záhrade pomáha hlboká jesenná orba, obmedzenie zaburinenia a striedanie plodín. Na monitoring dospelých sa využívajú feromónové lapače. Pri silnom výskyte v pôde sa aplikujú registrované pôdne prípravky proti larvám podľa plodiny a rozsahu napadnutia."},
+
+  /* ===================== ZÁHRADNÍ ŠKODCOVIA ===================== */
+  {cat:"zahradni",name:"Krtonôžka obyčajná (medvedík)",latin:"Gryllotalpa gryllotalpa",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Mole_cricket02.jpg?width=500",
+   desc:"Mohutný hnedý hmyz (do 5 cm) s lopatkovitými prednými nohami prispôsobenými na hrabanie. Žije pod zemou, kde razí chodby a ožiera korene, hľuzy a mladé rastliny. Najväčšie škody spôsobuje na záhonoch, v skleníkoch a trávnikoch.",
+   znaky:"Vyvýšené podpovrchové chodbičky, náhle vädnúce a podhryzené sadenice, nadhrnutá pôda a otvory v záhone.",
+   lik:"Účinné je narušovanie chodieb kyprením pôdy a inštalácia pascí (zapustené nádoby). Biologicky sa využívajú entomopatogénne háďatká aplikované do vlhkej pôdy. Pri veľkom premnožení sa cielene aplikujú registrované pôdne prípravky do chodieb a najviac postihnutých miest."},
+
+  {cat:"zahradni",name:"Molica skleníková",latin:"Trialeurodes vaporariorum",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/HEMI_Aleyrodidae_Trialeurodes_vaporariorum.png?width=500",
+   desc:"Drobný biely hmyz (1–2 mm) pripomínajúci maličkú moľu, ktorý sa hromadí na spodnej strane listov. Cicaním oslabuje rastliny a vylučuje medovicu, na ktorej rastú černe. Rýchlo sa množí najmä v skleníkoch a na izbových rastlinách.",
+   znaky:"Oblak bielych mušiek pri potrasení rastlinou, lepkavá medovica a čierne povlaky na listoch, žltnutie a vädnutie.",
+   lik:"Na monitoring a odchyt slúžia žlté lepové dosky, ktoré molicu priťahujú. V skleníkoch sa uplatňuje biologická ochrana (parazitická vosička Encarsia). Pri premnožení sa aplikujú registrované insekticídy s dôrazom na spodnú stranu listov a opakovanie zásahu kvôli vývojovým štádiám."},
+
+  {cat:"zahradni",name:"Voška",latin:"Aphididae",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Aphids_September_2008-1.jpg?width=500",
+   desc:"Malý mäkký hmyz (1–3 mm) zelenej, čiernej alebo inej farby, ktorý v kolóniách cicá šťavu z výhonkov a listov. Rýchlo sa množí a vylučuje sladkú medovicu lákajúcu mravce. Prenáša rastlinné vírusy a deformuje mladé časti rastlín.",
+   znaky:"Skrútené a deformované listy, lepkavá medovica a černe, kolónie vošiek na výhonkoch a púčikoch, prítomnosť mravcov.",
+   lik:"Podporujú sa prirodzení nepriatelia – lienky, zlatoočky a pestrice. Menší výskyt sa zvláda oplachom, mydlovým alebo olejovým roztokom. Pri silnom napadnutí sa aplikujú registrované insekticídy (aj systémové), pričom sa dbá na dôkladné pokrytie výhonkov a rubu listov."},
+
+  /* ===================== SKLADIŠTNÍ ŠKODCOVIA ===================== */
+  {cat:"skladistni",name:"Potemník (múčny)",latin:"Tribolium castaneum",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Tribolium_castaneum.jpg?width=500",
+   desc:"Malý hrdzavohnedý chrobák (3–4 mm), jeden z najčastejších škodcov múky a mlynských výrobkov. Napáda múku, krupicu, cereálie, korenie aj sušené potraviny, ktorým dodáva zatuchnutý pach. Rozmnožuje sa rýchlo v skladoch aj domácnostiach.",
+   znaky:"Pohybujúce sa chrobáky v múke a zásobách, zhrudkovatenie a nepríjemný pach potravín, výskyt v škárach políc.",
+   lik:"Napadnuté zásoby sa likvidujú a sklad či špajza sa dôkladne vyčistia a vysajú vrátane škár. Zásoby sa presunú do vzduchotesných nádob. V prevádzkach sa aplikuje reziduálne ošetrenie priestorov, monitoring feromónovými lapačmi a pri väčšom zamorení plynovanie skladu."},
+
+  {cat:"skladistni",name:"Zrniar čierny",latin:"Sitophilus granarius",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/COLE_Curculionidae_Sitophilus_granarius.png?width=500",
+   desc:"Tmavohnedý nosáčik (3–5 mm) s predĺženým rypáčikom, ktorý napáda celé obilné zrná. Samička kladie vajíčka dovnútra zrna, kde sa larva vyvíja a zrno zvnútra vyžerie. Patrí k najvýznamnejším škodcom skladovaného obilia.",
+   znaky:"Vyžraté zrná s výletovými otvormi, zvýšená vlhkosť a teplota v obilí, pohybujúce sa chrobáky na povrchu zásoby.",
+   lik:"Základom je kontrola vlhkosti a teploty skladovaného obilia a jeho pravidelné prevzdušňovanie. Sklady sa pred naskladnením ošetria reziduálne a monitorujú lapačmi. Pri zistenom napadnutí sa obilie ošetruje registrovanými prípravkami alebo sa vykonáva plynovanie (fumigácia) skladu."},
+
+  {cat:"skladistni",name:"Múčiar obyčajný",latin:"Tenebrio molitor",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Tenebrio_molitor-f.jpg?width=500",
+   desc:"Väčší čierny chrobák (12–18 mm), ktorého larvy sú známe ako „múčne červy“. Napáda múku, otruby, obilie a suché rastlinné zvyšky, obľubuje vlhké a zanedbané zákutia skladov. Larvy dokážu prežiť aj v menej kvalitných zvyškoch potravín.",
+   znaky:"Veľké žltohnedé larvy v zásobách a škárach, čierne chrobáky v tmavých vlhkých kútoch, znehodnotená múka a otruby.",
+   lik:"Odstránia sa napadnuté a staré zásoby a priestor sa dôkladne vyčistí a vysuší. Aplikuje sa reziduálne ošetrenie škár a úložných plôch, zásoby sa uskladnia vzduchotesne. Dôraz sa kladie na sanitáciu vlhkých zákutí, kde sa larvy vyvíjajú."},
+
+  {cat:"skladistni",name:"Zrnokaz fazuľový",latin:"Acanthoscelides obtectus",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Acanthoscelides_obtectus.jpg?width=500",
+   desc:"Krátky, zavalitý chrobáčik (2–4 mm) sivohnedej farby, ktorý napáda strukoviny – fazuľu, hrach a šošovicu. Larvy sa vyvíjajú vnútri semien, ktoré vyžerú a znehodnotia. Škodí na poli aj v uskladnených zásobách, kde sa množí ďalej.",
+   znaky:"Okrúhle výletové otvory v semenách, vyžraté a duté strukoviny, drobné chrobáky v skladovaných zásobách.",
+   lik:"Napadnuté semená sa vyradia; zdravé zásoby pomáha ošetriť vymrazením alebo krátkym prehriatím a uskladniť vzduchotesne. Sklady sa čistia a monitorujú, pri väčšom zamorení sa aplikuje reziduálne ošetrenie alebo plynovanie. Osivo sa pred sejbou kontroluje na prítomnosť škodcu."},
+
+  {cat:"skladistni",name:"Červotoč tabakový",latin:"Lasioderma serricorne",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Lasioderma_serricorne_%28Fabricius%2C_1792%29_%2828701262892%29.png?width=500",
+   desc:"Drobný svetlohnedý chrobáčik (2–3 mm) s klenutým telom, ktorý napáda tabak, koreniny, čaje, kakao, sušené bylinky aj krmivá. Larvy prevrtávajú suroviny a znehodnocujú ich trusom a chodbičkami. Je významným škodcom v potravinárskom a tabakovom priemysle.",
+   znaky:"Drobné otvory a podrť v koreninách a tabaku, poletujúce chrobáky pri svetle, znehodnotené sušené suroviny.",
+   lik:"Napadnuté suroviny sa likvidujú a sklad sa dôkladne vyčistí. Na monitoring sa nasadzujú feromónové lapače, priestory sa ošetria reziduálne. Pri väčšom zamorení skladov sa vykonáva plynovanie alebo ošetrenie v riadenej atmosfére, doplnené o prísnu skladovú hygienu."},
+
+  {cat:"skladistni",name:"Moľa obilná",latin:"Sitotroga cerealella",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Sitotroga_cerealella_on_corn.jpg?width=500",
+   desc:"Malá slamovožltá moľa, ktorej larvy sa vyvíjajú vnútri obilných zŕn – pšenice, kukurice a jačmeňa. Larva zrno vyžerie zvnútra a znehodnotí ho. Napáda zásoby na poli aj v sklade a rýchlo sa šíri v obilí.",
+   znaky:"Vyžraté zrná s okienkom či otvorom, poletujúce mole nad zásobou obilia, spriadanie na povrchu hromady.",
+   lik:"Sklady sa udržiavajú čisté, suché a chladné, obilie sa monitoruje a prevzdušňuje. Na odchyt samčekov slúžia feromónové lapače. Pri napadnutí sa aplikuje ošetrenie zásob registrovanými prípravkami alebo plynovanie skladu spolu s dôslednou sanitáciou."},
+
+  {cat:"skladistni",name:"Roztoč múčny",latin:"Acarus siro",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Grain_mite_1.JPG?width=500",
+   desc:"Mikroskopický svetlý roztoč (do 0,5 mm), ktorý sa premnožuje vo vlhkej múke, obilí, syroch a krmivách. Pri silnom výskyte dodáva potravinám sladkastý zápach a môže vyvolávať alergie. Rýchlo sa množí vo vlhkom a zle vetranom prostredí.",
+   znaky:"Sivastý „prach“ a pohyblivá vrstva na povrchu múky, sladkastý zápach, hrudkovatenie a znehodnotenie zásob.",
+   lik:"Rozhodujúce je zníženie vlhkosti a udržiavanie suchého, chladného skladu s dobrým vetraním. Napadnuté zásoby sa likvidujú, priestory čistia a vysušujú. V skladoch sa aplikuje akaricídne ošetrenie a monitoring vlhkosti, aby sa zabránilo opätovnému premnoženiu."},
+
+  /* ===================== HLODAVCE ===================== */
+  {cat:"hlodavce",name:"Potkan hnedý",latin:"Rattus norvegicus",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Brown_rat_%28Rattus_norvegicus%29_Drenthe_2.jpg?width=500",
+   desc:"Mohutný hlodavec s telom 20–28 cm a chvostom kratším než telo, sivohnedej farby. Žije pri zemi – v kanáloch, pivniciach, skladoch a v okolí odpadu, kde si hrabe nory. Je opatrný, inteligentný a prenáša viaceré nákazy, čím ohrozuje zdravie aj majetok.",
+   znaky:"Väčší trus (približne 1–2 cm), ohryzené obaly a káble, mastné šmuhy pozdĺž stien, nory v okolí základov a nočný šramot.",
+   lik:"Vykonáva sa deratizácia – rozmiestnenie zabezpečených deratizačných staničiek s nástrahou pozdĺž trás pohybu, doplnené o utesnenie vstupov a sanitáciu. Staničky sa pravidelne kontrolujú a dopĺňajú až do ustálenia. V citlivých prevádzkach sa uprednostňujú mechanické pasce a monitorovacie staničky podľa zásad IPM."},
+
+  {cat:"hlodavce",name:"Potkan čierny",latin:"Rattus rattus",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/House_Rat_David_Raju.jpg?width=500",
+   desc:"Štíhlejší a menší než potkan hnedý, s dlhším chvostom a veľkými ušami, výborný šplhač. Zdržiava sa vo vyšších poschodiach, podkroviach a na povalách, kam sa dostáva po vedeniach a stromoch. U nás je menej rozšírený, no v prístavoch a starších budovách sa vyskytuje.",
+   znaky:"Trus v podkroví a na povalách, ohryzené vedenia a izolácie vo výškach, šramot v stropoch a stenách v noci.",
+   lik:"Deratizácia sa zameriava na horné časti objektu – staničky a pasce sa umiestňujú v podkroví a pozdĺž šplhacích trás. Utesnia sa vstupy strechou, prestupmi a vetraním. Zásah sprevádza sanitácia a pravidelná kontrola, keďže tento druh je opatrný a dobre šplhá."},
+
+  {cat:"hlodavce",name:"Myš domová",latin:"Mus musculus",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Mouse_white_background.jpg?width=500",
+   desc:"Malý sivastý hlodavec s telom 7–10 cm a jemnou srsťou, ktorý žije v tesnej blízkosti človeka. Prenikne aj drobnou škárou (okolo 6 mm) a hniezdi v stenách, nábytku a skladoch. Rýchlo sa množí a znečisťuje potraviny trusom a močom.",
+   znaky:"Drobný tmavý trus (rôzne rozmiestnený), ohryzené potraviny a obaly, charakteristický pižmový zápach a nočný šramot.",
+   lik:"Kľúčové je utesnenie všetkých vstupných škár a odstránenie prístupu k potrave. Rozmiestňujú sa mechanické pasce a zabezpečené deratizačné staničky s nástrahou pozdĺž stien. V potravinárskych prevádzkach sa uplatňuje monitoring a IPM prístup s pravidelnou kontrolou a dokumentáciou."},
+
+  {cat:"hlodavce",name:"Hraboš poľný",latin:"Microtus arvalis",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Feldmaus_Microtus_arvalis.jpg?width=500",
+   desc:"Malý hlodavec s krátkym chvostom a zavalitým telom, ktorý žije v systéme nôr na poliach, lúkach a v záhradách. V rokoch premnoženia spôsobuje rozsiahle škody na plodinách, tráve a mladých stromčekoch. Množí sa veľmi rýchlo a dokáže vytvoriť hustú sieť chodieb.",
+   znaky:"Množstvo otvorov nôr s vychodenými chodníčkami, ohryzené korene a kôra stromčekov, hynúce rastliny na záhone.",
+   lik:"V záhrade pomáha kosenie, kyprenie pôdy a podpora prirodzených nepriateľov (dravce, sovy – napr. inštaláciou bidiel). Pri premnožení sa aplikujú registrované nástrahy priamo do aktívnych nôr podľa zásad ochrany. Rozsiahle poľné zamorenia rieši cielená deratizácia v súlade s predpismi o ochrane rastlín."},
+
+  {cat:"hlodavce",name:"Ryšavka žltohrdlá",latin:"Apodemus flavicollis",
+   img:"https://commons.wikimedia.org/wiki/Special:FilePath/Apodemus.flavicollis.jpg?width=500",
+   desc:"Elegantný hlodavec s veľkými očami a ušami, dlhým chvostom a nápadne dvojfarebnou srsťou (hnedý chrbát, biele bruško). Žije prevažne v lesoch, záhradách a na okrajoch polí, na jeseň sa sťahuje do chát, garáží a skladov. Dobre šplhá a skáče, čím sa dostane aj do vyšších priestorov.",
+   znaky:"Nočný šramot v chatách a garážach na jeseň, ohryzené zásoby a semená, trus v odľahlých priestoroch a zásuvkách.",
+   lik:"Objekty (najmä sezónne obývané chaty) sa zabezpečia utesnením vstupov a odstránením zásob lákajúcich hlodavce. Rozmiestňujú sa mechanické pasce a zabezpečené staničky, ideálne pred príchodom zimy. Pravidelná kontrola a udržiavanie poriadku v okolí obmedzuje opätovné vnikanie."}
+  ];
+
+  /* ---------- vykreslenie ---------- */
+  var grid   = document.getElementById('dddEncGrid');
+  var tabsEl = document.getElementById('dddEncTabs');
+  var countEl= document.getElementById('dddEncCount');
+  var emptyEl= document.getElementById('dddEncEmpty');
+  var search = document.getElementById('dddEncSearch');
+  var modal  = document.getElementById('dddEncModal');
+  var dialog = document.getElementById('dddEncDialog');
+
+  var catLabel = {};
+  CATS.forEach(function(c){ catLabel[c.id]=c.label; });
+
+  var state = {cat:"all", q:""};
+
+  // ikona-fallback (SVG chrobáka) pre prípad nedostupného obrázka
+  var BUG_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 8a4 5 0 0 1 4 5v2a4 5 0 0 1-8 0v-2a4 5 0 0 1 4-5Z"/><path d="M12 8V5m-2-2 2 2 2-2M4 11h3M4 15h3M4 19l3-2M17 11h3M17 15h3M17 19l-3-2"/></svg>';
+
+  function normalize(s){
+    return (s||"").toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éě]/g,'e').replace(/[íï]/g,'i')
+      .replace(/[óô]/g,'o').replace(/[úů]/g,'u').replace(/[ýÿ]/g,'y')
+      .replace(/[č]/g,'c').replace(/[ď]/g,'d').replace(/[ĺľ]/g,'l')
+      .replace(/[ňñ]/g,'n').replace(/[ŕř]/g,'r').replace(/[š]/g,'s')
+      .replace(/[ť]/g,'t').replace(/[ž]/g,'z');
+  }
+
+  function imgTag(item){
+    var alt = item.name + ' – ' + item.latin;
+    return '<img src="'+item.img+'" alt="'+alt+'" loading="lazy" '+
+      'onerror="this.onerror=null;this.parentNode.innerHTML=\'<div class=&quot;ddd-enc-fallback&quot;>'+
+      BUG_SVG.replace(/"/g,'&quot;')+'<span>'+item.latin+'</span></div>\'">';
+  }
+
+  function buildTabs(){
+    tabsEl.innerHTML = CATS.map(function(c){
+      var n = c.id==="all" ? DATA.length : DATA.filter(function(d){return d.cat===c.id;}).length;
+      return '<button class="ddd-enc-tab'+(c.id===state.cat?' active':'')+'" data-cat="'+c.id+'">'+
+             c.label+'<span class="c">'+n+'</span></button>';
+    }).join('');
+    Array.prototype.forEach.call(tabsEl.querySelectorAll('.ddd-enc-tab'),function(b){
+      b.addEventListener('click',function(){ state.cat=b.getAttribute('data-cat'); render(); });
+    });
+  }
+
+  function filtered(){
+    var q = normalize(state.q.trim());
+    return DATA.filter(function(d){
+      var okCat = state.cat==="all" || d.cat===state.cat;
+      var okQ = !q || normalize(d.name+' '+d.latin+' '+catLabel[d.cat]).indexOf(q)>-1;
+      return okCat && okQ;
+    });
+  }
+
+  function render(){
+    buildTabs();
+    var list = filtered();
+    countEl.textContent = 'Zobrazené: '+list.length+' z '+DATA.length+' škodcov';
+    if(!list.length){ grid.innerHTML=''; emptyEl.style.display='block'; return; }
+    emptyEl.style.display='none';
+    grid.innerHTML = list.map(function(d){
+      var idx = DATA.indexOf(d);
+      return '<article class="ddd-enc-card" data-idx="'+idx+'">'+
+        '<div class="ddd-enc-thumb"><span class="ddd-enc-badge">'+catLabel[d.cat]+'</span>'+imgTag(d)+'</div>'+
+        '<div class="ddd-enc-body">'+
+          '<h3>'+d.name+'</h3>'+
+          '<div class="ddd-enc-latin">'+d.latin+'</div>'+
+          '<p class="ddd-enc-desc">'+d.desc+'</p>'+
+          '<span class="ddd-enc-more">Zobraziť postup likvidácie ›</span>'+
+        '</div>'+
+      '</article>';
+    }).join('');
+    Array.prototype.forEach.call(grid.querySelectorAll('.ddd-enc-card'),function(card){
+      card.addEventListener('click',function(){ openModal(parseInt(card.getAttribute('data-idx'),10)); });
+    });
+  }
+
+  var ICON_INFO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>';
+  var ICON_EYE ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var ICON_SHLD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>';
+
+  function openModal(idx){
+    var d = DATA[idx];
+    dialog.innerHTML =
+      '<div class="ddd-enc-mhead"><button class="ddd-enc-close" aria-label="Zavrieť">×</button>'+imgTag(d)+'</div>'+
+      '<div class="ddd-enc-mbody">'+
+        '<span class="ddd-enc-badge">'+catLabel[d.cat]+'</span>'+
+        '<h2>'+d.name+'</h2>'+
+        '<div class="ddd-enc-latin">'+d.latin+'</div>'+
+        '<div class="ddd-enc-sec"><h4>'+ICON_INFO+'Popis</h4><p>'+d.desc+'</p></div>'+
+        (d.znaky?'<div class="ddd-enc-sec"><h4>'+ICON_EYE+'Znaky napadnutia</h4><p>'+d.znaky+'</p></div>':'')+
+        '<div class="ddd-enc-sec"><h4>'+ICON_SHLD+'Ako likvidovať – odborný postup</h4><p>'+d.lik+'</p></div>'+
+        '<div class="ddd-enc-callout"><strong>Potrebujete pomôcť?</strong> Pri rozsiahlom zamorení odporúčame odborný zásah, ktorý bezpečne a trvalo odstráni problém.'+
+          '<br><a class="ddd-enc-cta" href="'+CTA_LINK+'">'+CTA_TEXT+'</a></div>'+
+      '</div>';
+    dialog.querySelector('.ddd-enc-close').addEventListener('click',closeModal);
+    modal.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(){ modal.classList.remove('open'); document.body.style.overflow=''; }
+
+  modal.addEventListener('click',function(e){ if(e.target===modal) closeModal(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
+  search.addEventListener('input',function(){ state.q=search.value; render(); });
+
+  render();
+})();
+</script>
+</div>
+<!-- ===== KONIEC: Encyklopédia škodcov – DDD Prešov ===== -->
