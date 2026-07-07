@@ -1,5 +1,5 @@
 <!-- ============================================================
-     ENCYKLOPÉDIA ŠKODCOV – DDD Prešov (dddpresov.sk)
+     ENCYKLOPÉDIA ŠKODCOV – DeArt, s.r.o. (deartddd.sk)
      Samostatný HTML súbor. Vložte do WordPressu cez blok
      "Vlastné HTML" (Custom HTML) alebo Elementor "HTML" widget.
      Celý dizajn, filtrovanie aj vyhľadávanie je v tomto súbore.
@@ -59,8 +59,16 @@
 .ddd-enc-callout strong{color:var(--enc-green-d)}
 .ddd-enc-cta{display:inline-block;margin-top:12px;background:var(--enc-accent);color:#1c2622;font-weight:700;text-decoration:none;padding:11px 20px;border-radius:10px;font-size:14px}
 .ddd-enc-cta:hover{filter:brightness(1.05)}
-.ddd-enc-foot{margin:26px 4px 6px;font-size:11.5px;color:var(--enc-muted);text-align:center}
+.ddd-enc-cta-2{background:transparent;color:var(--enc-green-d);border:1.5px solid var(--enc-green);padding:9.5px 16px}
+.ddd-enc-contact{margin-top:12px}
+.ddd-enc-firma{display:block;font-weight:700;color:var(--enc-dark);font-size:13px;margin-bottom:10px}
+.ddd-enc-btns{display:flex;flex-wrap:wrap;gap:10px}
+.ddd-enc-btns .ddd-enc-cta{margin-top:0}
+.ddd-enc-foot{margin:26px 4px 6px;font-size:11.5px;color:var(--enc-muted);text-align:center;line-height:1.9}
 .ddd-enc-foot a{color:var(--enc-muted)}
+.ddd-enc-footcontact{font-size:13px;color:var(--enc-dark);margin-bottom:8px}
+.ddd-enc-footcontact a{color:var(--enc-green-d);text-decoration:none;font-weight:600}
+.ddd-enc-footcontact a:hover{text-decoration:underline}
 @media(max-width:600px){.ddd-enc-hero{padding:26px 20px}.ddd-enc-mbody{padding:18px 18px 24px}}
 </style>
 
@@ -78,7 +86,8 @@
 <div class="ddd-enc-empty" id="dddEncEmpty" style="display:none">Pre zadané kritériá sme nenašli žiadneho škodcu. Skúste iný výraz.</div>
 
 <div class="ddd-enc-foot">
-  Fotografie: <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> (licencie jednotlivých autorov). Obsah má informatívny charakter – pri zamorení odporúčame odborný zásah.
+  <div class="ddd-enc-footcontact"><strong>DeArt, s.r.o.</strong> · Moyzesova 1505/3, 934 05 Levice · <a href="tel:+421902332805">0902&nbsp;332&nbsp;805</a> · <a href="mailto:deartsro@gmail.com">deartsro@gmail.com</a> · <a href="https://www.deartddd.sk/" target="_blank" rel="noopener">www.deartddd.sk</a></div>
+  <div>Fotografie: <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> (licencie jednotlivých autorov). Obsah má informatívny charakter – pri zamorení odporúčame odborný zásah.</div>
 </div>
 
 <!-- Modal -->
@@ -90,9 +99,13 @@
 (function(){
   "use strict";
 
-  // ---- KONFIGURÁCIA: telefón / odkaz na objednávku (upravte podľa potreby) ----
-  var CTA_LINK = "https://www.dddpresov.sk/kontakt";
-  var CTA_TEXT = "Objednať odborný zásah";
+  // ---- KONFIGURÁCIA: kontaktné údaje (upravte podľa potreby) ----
+  var FIRMA    = "DeArt, s.r.o.";
+  var ADRESA   = "Moyzesova 1505/3, 934 05 Levice";
+  var TEL      = "0902 332 805";
+  var TEL_HREF = "+421902332805";
+  var EMAIL    = "deartsro@gmail.com";
+  var WEB      = "https://www.deartddd.sk/";
 
   var CATS = [
     {id:"all",       label:"Všetci škodcovia"},
@@ -447,8 +460,10 @@
         '<div class="ddd-enc-sec"><h4>'+ICON_INFO+'Popis</h4><p>'+d.desc+'</p></div>'+
         (d.znaky?'<div class="ddd-enc-sec"><h4>'+ICON_EYE+'Znaky napadnutia</h4><p>'+d.znaky+'</p></div>':'')+
         '<div class="ddd-enc-sec"><h4>'+ICON_SHLD+'Ako likvidovať – odborný postup</h4><p>'+d.lik+'</p></div>'+
-        '<div class="ddd-enc-callout"><strong>Potrebujete pomôcť?</strong> Pri rozsiahlom zamorení odporúčame odborný zásah, ktorý bezpečne a trvalo odstráni problém.'+
-          '<br><a class="ddd-enc-cta" href="'+CTA_LINK+'">'+CTA_TEXT+'</a></div>'+
+        '<div class="ddd-enc-callout"><strong>Potrebujete pomôcť so škodcami?</strong> Pri rozsiahlom zamorení odporúčame odborný zásah, ktorý bezpečne a trvalo odstráni problém. Ozvite sa nám:'+
+          '<div class="ddd-enc-contact"><span class="ddd-enc-firma">'+FIRMA+' · '+ADRESA+'</span>'+
+          '<span class="ddd-enc-btns"><a class="ddd-enc-cta" href="tel:'+TEL_HREF+'">📞 '+TEL+'</a>'+
+          '<a class="ddd-enc-cta ddd-enc-cta-2" href="mailto:'+EMAIL+'">✉️ '+EMAIL+'</a></span></div></div>'+
       '</div>';
     dialog.querySelector('.ddd-enc-close').addEventListener('click',closeModal);
     modal.classList.add('open');
@@ -464,4 +479,4 @@
 })();
 </script>
 </div>
-<!-- ===== KONIEC: Encyklopédia škodcov – DDD Prešov ===== -->
+<!-- ===== KONIEC: Encyklopédia škodcov – DeArt, s.r.o. ===== -->
