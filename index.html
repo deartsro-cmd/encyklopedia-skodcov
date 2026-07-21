@@ -7,10 +7,12 @@
      ============================================================ -->
 <div id="ddd-encyklopedia">
 <style>
-/* --- izolované štýly (prefix .ddd-enc-, aby nekolidovali s témou) --- */
-#ddd-encyklopedia{--enc-green:#1f7a53;--enc-green-d:#155c3d;--enc-accent:#e6a417;--enc-dark:#1c2622;--enc-muted:#5c6b64;--enc-bg:#f4f7f5;--enc-card:#ffffff;--enc-line:#e2e9e5;--enc-radius:16px;--enc-shadow:0 6px 22px rgba(20,60,45,.08);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--enc-dark);line-height:1.6;box-sizing:border-box;max-width:1200px;margin:0 auto;padding:8px}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap');
+/* --- izolované štýly (prefix .ddd-enc-, zladené s webom DeArt) --- */
+#ddd-encyklopedia{--enc-green:#a02c2d;--enc-green-d:#7d2122;--enc-accent:#a02c2d;--enc-navy:#04073c;--enc-navy-d:#00102e;--enc-dark:#00102e;--enc-muted:#6b7280;--enc-bg:#f4f4f4;--enc-card:#ffffff;--enc-line:#e6e6e6;--enc-radius:16px;--enc-shadow:0 6px 22px rgba(4,7,60,.09);font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#424242;line-height:1.6;box-sizing:border-box;max-width:1200px;margin:0 auto;padding:8px}
+#ddd-encyklopedia h1,#ddd-encyklopedia h2,#ddd-encyklopedia h3,#ddd-encyklopedia h4{font-family:'Sora','Inter',sans-serif}
 #ddd-encyklopedia *,#ddd-encyklopedia *::before,#ddd-encyklopedia *::after{box-sizing:border-box}
-.ddd-enc-hero{background:linear-gradient(135deg,var(--enc-green),var(--enc-green-d));color:#fff;border-radius:var(--enc-radius);padding:34px 28px;margin-bottom:22px}
+.ddd-enc-hero{background:linear-gradient(135deg,var(--enc-navy),var(--enc-navy-d));color:#fff;border-radius:var(--enc-radius);padding:34px 28px;margin-bottom:22px}
 .ddd-enc-hero h1{margin:0 0 8px;font-size:clamp(24px,4vw,34px);line-height:1.2;font-weight:800;letter-spacing:-.5px}
 .ddd-enc-hero p{margin:0;max-width:760px;opacity:.94;font-size:15.5px}
 .ddd-enc-controls{position:sticky;top:0;z-index:20;background:var(--enc-bg);padding:12px 4px;margin:0 -4px 18px;border-radius:12px}
@@ -28,12 +30,12 @@
 .ddd-enc-thumb{position:relative;aspect-ratio:4/3;background:#e9efeb;overflow:hidden}
 .ddd-enc-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
 .ddd-enc-card:hover .ddd-enc-thumb img{transform:scale(1.05)}
-.ddd-enc-badge{position:absolute;top:10px;left:10px;background:rgba(28,38,34,.82);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;backdrop-filter:blur(3px)}
-.ddd-enc-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#dfeae4,#eef3f0);color:var(--enc-green-d);text-align:center;padding:14px}
+.ddd-enc-badge{position:absolute;top:10px;left:10px;background:rgba(4,7,60,.85);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;backdrop-filter:blur(3px)}
+.ddd-enc-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#e9e9ec,#f6f6f8);color:var(--enc-navy);text-align:center;padding:14px}
 .ddd-enc-fallback svg{width:44px;height:44px;opacity:.5}
 .ddd-enc-fallback span{font-size:12px;font-style:italic;opacity:.8}
 .ddd-enc-body{padding:15px 16px 17px;display:flex;flex-direction:column;gap:6px;flex:1}
-.ddd-enc-body h3{margin:0;font-size:17px;font-weight:700;line-height:1.25}
+.ddd-enc-body h3{margin:0;font-size:17px;font-weight:700;line-height:1.25;color:var(--enc-dark)}
 .ddd-enc-latin{font-style:italic;color:var(--enc-muted);font-size:12.5px;margin-top:-2px}
 .ddd-enc-desc{font-size:13.5px;color:#3c4842;margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .ddd-enc-more{margin-top:auto;padding-top:10px;color:var(--enc-green);font-weight:700;font-size:13px;display:flex;align-items:center;gap:5px}
@@ -49,15 +51,15 @@
 .ddd-enc-close:hover{background:var(--enc-dark)}
 .ddd-enc-mbody{padding:22px 26px 28px}
 .ddd-enc-mbody .ddd-enc-badge{position:static;display:inline-block;margin-bottom:10px;background:var(--enc-green);backdrop-filter:none}
-.ddd-enc-mbody h2{margin:0 0 2px;font-size:24px;font-weight:800}
+.ddd-enc-mbody h2{margin:0 0 2px;font-size:24px;font-weight:800;color:var(--enc-dark)}
 .ddd-enc-mbody .ddd-enc-latin{font-size:14px;margin-bottom:16px}
 .ddd-enc-sec{margin-top:18px}
 .ddd-enc-sec h4{margin:0 0 7px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--enc-green-d);display:flex;align-items:center;gap:7px}
 .ddd-enc-sec h4 svg{width:17px;height:17px}
 .ddd-enc-sec p{margin:0;font-size:14.5px;color:#33403a}
-.ddd-enc-callout{background:#f0f7f3;border:1px solid #d6e7dd;border-left:4px solid var(--enc-green);border-radius:10px;padding:14px 16px;margin-top:22px;font-size:13.5px}
+.ddd-enc-callout{background:#f7f7f8;border:1px solid #e6e6e6;border-left:4px solid var(--enc-green);border-radius:10px;padding:14px 16px;margin-top:22px;font-size:13.5px}
 .ddd-enc-callout strong{color:var(--enc-green-d)}
-.ddd-enc-cta{display:inline-block;margin-top:12px;background:var(--enc-accent);color:#1c2622;font-weight:700;text-decoration:none;padding:11px 20px;border-radius:10px;font-size:14px}
+.ddd-enc-cta{display:inline-block;margin-top:12px;background:var(--enc-accent);color:#fff;font-weight:700;text-decoration:none;padding:12px 24px;border-radius:999px;font-size:14px;letter-spacing:.2px}
 .ddd-enc-cta:hover{filter:brightness(1.05)}
 .ddd-enc-cta-2{background:transparent;color:var(--enc-green-d);border:1.5px solid var(--enc-green);padding:9.5px 16px}
 .ddd-enc-contact{margin-top:12px}
