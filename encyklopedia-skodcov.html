@@ -1,5 +1,5 @@
 <!-- ============================================================
-     ENCYKLOPÉDIA ŠKODCOV – DeArt, s.r.o. (deartddd.sk)
+     ENCYKLOPÉDIA ŠKODCOV – DeArt (deartddd.sk)
      Samostatný HTML súbor. Vložte do WordPressu cez blok
      "Vlastné HTML" (Custom HTML) alebo Elementor "HTML" widget.
      Celý dizajn, filtrovanie aj vyhľadávanie je v tomto súbore.
@@ -88,7 +88,7 @@
 <div class="ddd-enc-empty" id="dddEncEmpty" style="display:none">Pre zadané kritériá sme nenašli žiadneho škodcu. Skúste iný výraz.</div>
 
 <div class="ddd-enc-foot">
-  <div class="ddd-enc-footcontact"><strong>DeArt, s.r.o.</strong> · Moyzesova 1505/3, 934 05 Levice · <a href="tel:+421902332805">0902&nbsp;332&nbsp;805</a> · <a href="mailto:deartsro@gmail.com">deartsro@gmail.com</a> · <a href="https://www.deartddd.sk/" target="_blank" rel="noopener">www.deartddd.sk</a></div>
+  <div class="ddd-enc-footcontact"><strong>DeArt</strong> · Moyzesova 1505/3, 934 05 Levice · <a href="tel:+421902332805">0902&nbsp;332&nbsp;805</a> · <a href="mailto:deartsro@gmail.com">deartsro@gmail.com</a> · <a href="https://www.deartddd.sk/" target="_blank" rel="noopener">www.deartddd.sk</a></div>
   <div>Fotografie: <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> (licencie jednotlivých autorov). Obsah má informatívny charakter – pri zamorení odporúčame odborný zásah.</div>
 </div>
 
@@ -102,7 +102,7 @@
   "use strict";
 
   // ---- KONFIGURÁCIA: kontaktné údaje (upravte podľa potreby) ----
-  var FIRMA    = "DeArt, s.r.o.";
+  var FIRMA    = "DeArt";
   var ADRESA   = "Moyzesova 1505/3, 934 05 Levice";
   var TEL      = "0902 332 805";
   var TEL_HREF = "+421902332805";
@@ -397,6 +397,11 @@
       .replace(/[ť]/g,'t').replace(/[ž]/g,'z');
   }
 
+  // --- adresa (slug) pre každý druh: napr. #rus-domovy ---
+  function slugify(s){ return normalize(s).replace(/[()]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  var slugToIdx = {};
+  DATA.forEach(function(d,i){ var sl=slugify(d.name); if(slugToIdx[sl]!==undefined) sl=sl+'-'+i; d.slug=sl; slugToIdx[sl]=i; });
+
   function imgTag(item){
     var alt = item.name + ' – ' + item.latin;
     return '<img src="'+item.img+'" alt="'+alt+'" loading="lazy" '+
@@ -451,7 +456,7 @@
   var ICON_EYE ='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
   var ICON_SHLD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>';
 
-  function openModal(idx){
+  function openModal(idx, fromRoute){
     var d = DATA[idx];
     dialog.innerHTML =
       '<div class="ddd-enc-mhead"><button class="ddd-enc-close" aria-label="Zavrieť">×</button>'+imgTag(d)+'</div>'+
@@ -467,18 +472,30 @@
           '<span class="ddd-enc-btns"><a class="ddd-enc-cta" href="tel:'+TEL_HREF+'">📞 '+TEL+'</a>'+
           '<a class="ddd-enc-cta ddd-enc-cta-2" href="mailto:'+EMAIL+'">✉️ '+EMAIL+'</a></span></div></div>'+
       '</div>';
-    dialog.querySelector('.ddd-enc-close').addEventListener('click',closeModal);
+    dialog.querySelector('.ddd-enc-close').addEventListener('click',function(){ closeModal(); });
     modal.classList.add('open');
     document.body.style.overflow='hidden';
+    if(!fromRoute){ try{ history.pushState({slug:d.slug},'','#'+d.slug); }catch(e){ location.hash=d.slug; } }
   }
-  function closeModal(){ modal.classList.remove('open'); document.body.style.overflow=''; }
+  function closeModal(fromRoute){
+    modal.classList.remove('open'); document.body.style.overflow='';
+    if(!fromRoute && location.hash){ try{ history.pushState(null,'',location.pathname+location.search); }catch(e){ location.hash=''; } }
+  }
+  function route(){
+    var sl=decodeURIComponent((location.hash||'').replace(/^#/,''));
+    if(sl && slugToIdx[sl]!==undefined){ openModal(slugToIdx[sl], true); }
+    else { closeModal(true); }
+  }
 
   modal.addEventListener('click',function(e){ if(e.target===modal) closeModal(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
   search.addEventListener('input',function(){ state.q=search.value; render(); });
+  window.addEventListener('popstate', route);
+  window.addEventListener('hashchange', route);
 
   render();
+  route();
 })();
 </script>
 </div>
-<!-- ===== KONIEC: Encyklopédia škodcov – DeArt, s.r.o. ===== -->
+<!-- ===== KONIEC: Encyklopédia škodcov – DeArt ===== -->
